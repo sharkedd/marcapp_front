@@ -33,15 +33,18 @@ const styles = StyleSheet.create({
       textAlign: 'left',
     },
     button: {
-      backgroundColor: '#0AA5F2',
-      borderRadius: 5,
-      marginVertical: 10,
-      marginHorizontal: 100,
-      alignItems: 'center',
+      height: 40, // Ajusta la altura del botón aquí
+      width: 80, // Ajusta el ancho del botón aquí
+    },
+    buttonContainer: {
+      position: 'relative',
     },
     buttonText: {
       color: 'white',
       fontWeight: 'bold',
+    },
+    buttonWrapper: {
+      margin: 10,
     },
     sectionTitle: {
       fontSize: 18,
@@ -97,6 +100,7 @@ const styles = StyleSheet.create({
     },
     scrollContainer: {
       maxHeight: 600, // Ajusta esta altura según sea necesario
+      width: '100%',
     },
     errorMessage: {
       color: 'red',
@@ -138,6 +142,38 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         marginHorizontal: 20,
         textAlign: 'center',
+      },
+      navigate: {
+        textAlign: 'left',
+        marginTop: '0%',
+        fontSize: 25,
+      },
+      graphic: {
+        height: 200,
+        padding: 20,
+        flexDirection: 'row'
+      },
+      yaxis: {
+        marginBottom: 30
+      },
+      insetY: {
+        top: 10,
+        bottom: 10
+      },
+      barchart: {
+        flex: 1, 
+        marginLeft: 10
+      },
+      barchartType: {
+        flex: 1
+      },
+      xaxis: {
+        marginHorizontal: -10,
+        height: 30
+      },
+      insetX: {
+        left: 10,
+        right: 10
       },
 });
 
