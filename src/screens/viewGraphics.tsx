@@ -98,7 +98,7 @@ const ViewGraphics: React.FC<SearchWorkerProps> = ({ navigation }) => {
           const itemDate = moment(item.day, 'DD-MM-YYYY');
           if (item.idUser === userId && itemDate.isBetween(initWeek, endWeek, 'day', '[]')) {
             const dayOfWeek = itemDate.isoWeekday() - 1;
-            averages[dayOfWeek] = item.average_hours_worked;
+            averages[dayOfWeek] = item.dailyHoursWorked;
           }
         });
 
