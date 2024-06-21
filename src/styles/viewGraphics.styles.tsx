@@ -175,6 +175,26 @@ const styles = StyleSheet.create({
         left: 10,
         right: 10
       },
+      linechart: {
+        flex: 1,
+        flexDirection: 'row',
+        marginLeft: 10,
+      },
+      linechartType: {
+        flex: 1,
+        height: 200,
+      },
+      selectedText: {
+        color: 'green',
+        fontWeight: 'bold',
+        marginLeft: 10,
+      },
+      userName: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        marginVertical: 10,
+        textAlign: 'center',
+      },
 });
 
 export default styles;

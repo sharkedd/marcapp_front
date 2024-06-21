@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Text, ListItem, Button, Header } from 'react-native-elements';
+import { Text, ListItem, Button, Header, CheckBox } from 'react-native-elements';
 import viewGraphicsService from '../services/viewGraphics.service';
 import { View, StyleSheet, TextInput, FlatList, TouchableOpacity, ScrollView, ActivityIndicator, Modal, TouchableHighlight } from 'react-native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -7,7 +7,6 @@ import { RootStackParamList } from '../../Router';
 import moment from 'moment';
 import { Box } from 'native-base';
 import { BarChart, Grid, XAxis, YAxis } from 'react-native-svg-charts';
-import { Dimensions } from 'react-native';
 import styles from '../styles/viewGraphics.styles';
 
 type SearchWorkerProps = {
@@ -17,23 +16,27 @@ type SearchWorkerProps = {
 const ViewGraphics: React.FC<SearchWorkerProps> = ({ navigation }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [searchResults, setSearchResults] = useState<any[]>([]);
-  const [selectedUser, setSelectedUser] = useState<any>(null);
+  const [selectedUsers, setSelectedUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
-  const [averageHours, setAverageHours] = useState<number[]>([]);
+  const [averageHours, setAverageHours] = useState<{ [key: number]: number[] }>({});
   const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear());
   const [viewType, setViewType] = useState<'year' | 'week'>('year');
+  const [currentWeek, setCurrentWeek] = useState(moment().startOf('isoWeek'));
+  const [multiSelect, setMultiSelect] = useState(false);
 
   useEffect(() => {
-    if (selectedUser) {
-      if (viewType === 'year') {
-        fetchMonthlyAverageHours(selectedUser, selectedYear);
-      } else {
-        //fetchWeeklyAverageHours(selectedUser);
-      }
+    if (selectedUsers.length > 0) {
+      selectedUsers.forEach(user => {
+        if (viewType === 'year') {
+          fetchMonthlyAverageHours(user.id, selectedYear);
+        } else {
+          fetchWeeklyAverageHours(user.id, currentWeek);
+        }
+      });
     }
-  }, [selectedUser, selectedYear, viewType]);
+  }, [selectedUsers, selectedYear, viewType, currentWeek]);
 
   const handleSearch = async () => {
     setLoading(true);
@@ -63,7 +66,6 @@ const ViewGraphics: React.FC<SearchWorkerProps> = ({ navigation }) => {
   const fetchMonthlyAverageHours = async (userId: number, year: number) => {
     try {
       const response = await viewGraphicsService.getMonthlyAverageHours();
-      //console.log("RESPONSE EN FRONT:", response);
       if (response.success) {
         const averages = Array(12).fill(0);
         response.data.forEach((item: any) => {
@@ -73,8 +75,7 @@ const ViewGraphics: React.FC<SearchWorkerProps> = ({ navigation }) => {
             averages[itemMonth] = item.average_hours_worked;
           }
         });
-        console.log("averages:", averages);
-        setAverageHours(averages);
+        setAverageHours(prev => ({ ...prev, [userId]: averages }));
       } else {
         setErrorMessage(response.message || "Error fetching monthly average hours.");
       }
@@ -84,8 +85,61 @@ const ViewGraphics: React.FC<SearchWorkerProps> = ({ navigation }) => {
     }
   };
 
+  const fetchWeeklyAverageHours = async (userId: number, week: moment.Moment) => {
+    try {
+      const response = await viewGraphicsService.getWeeklyAverageHours();
+      if (response.success) {
+        setLoading(true);
+        const initWeek = week.clone().startOf('isoWeek');
+        const endWeek = week.clone().endOf('isoWeek');
+        const averages = Array(7).fill(0);
+
+        response.data.forEach((item: any) => {
+          const itemDate = moment(item.day, 'DD-MM-YYYY');
+          if (item.idUser === userId && itemDate.isBetween(initWeek, endWeek, 'day', '[]')) {
+            const dayOfWeek = itemDate.isoWeekday() - 1;
+            averages[dayOfWeek] = item.average_hours_worked;
+          }
+        });
+
+        setAverageHours(prev => ({ ...prev, [userId]: averages }));
+      } else {
+        setErrorMessage(response.message || "Error fetching weekly average hours.");
+      }
+    } catch (error) {
+      console.error('Error fetching weekly average hours:', error);
+      setErrorMessage('Error fetching weekly average hours.');
+    }
+  };
+
   const handleYearChange = (direction: 'prev' | 'next') => {
     setSelectedYear((prevYear) => direction === 'prev' ? prevYear - 1 : prevYear + 1);
+  };
+
+  const handleWeekChange = (direction: 'prev' | 'next') => {
+    setCurrentWeek((prevWeek) =>
+      direction === 'prev' ? prevWeek.clone().subtract(1, 'weeks') : prevWeek.clone().add(1, 'weeks')
+    );
+  };
+
+  const handleUserSelection = (user: any) => {
+    if (multiSelect) {
+      setSelectedUsers(prev => {
+        if (prev.some(u => u.id === user.id)) {
+          return prev.filter(u => u.id !== user.id);
+        } else {
+          return [...prev, user];
+        }
+      });
+    } else {
+      setSelectedUsers([user]);
+      setModalVisible(true);
+    }
+  };
+
+  const handleLongPress = (user: any) => {
+    setMultiSelect(true);
+    setSelectedUsers([user]);
   };
 
   const renderProfilePicture = (name: string) => {
@@ -106,6 +160,7 @@ const ViewGraphics: React.FC<SearchWorkerProps> = ({ navigation }) => {
     }
     return color;
   };
+
   return (
     <Box style={styles.container}>
       <Header
@@ -141,96 +196,152 @@ const ViewGraphics: React.FC<SearchWorkerProps> = ({ navigation }) => {
           data={searchResults}
           keyExtractor={(item, index) => index.toString()}
           renderItem={({ item }) => (
-            <ListItem onPress={() => {
-              setSelectedUser(item.id);
-              setModalVisible(true);
-            }}>
-              <View style={styles.userInfo}>
-                {renderProfilePicture(item.firstName)}
-                <ListItem.Content>
-                  <ListItem.Title>{item.firstName} {item.lastName}</ListItem.Title>
-                  <ListItem.Subtitle>E-mail: {item.email}</ListItem.Subtitle>
-                  <ListItem.Subtitle>User ID: {item.id}</ListItem.Subtitle>
-                </ListItem.Content>
-              </View>
-            </ListItem>
+            <TouchableOpacity 
+              onPress={() => handleUserSelection(item)} 
+              onLongPress={() => handleLongPress(item)}
+            >
+              <ListItem>
+                <View style={styles.userInfo}>
+                  {renderProfilePicture(item.firstName)}
+                  <ListItem.Content>
+                    <ListItem.Title>{item.firstName} {item.lastName}</ListItem.Title>
+                    <ListItem.Subtitle>E-mail: {item.email}</ListItem.Subtitle>
+                    <ListItem.Subtitle>User ID: {item.id}</ListItem.Subtitle>
+                  </ListItem.Content>
+                  {multiSelect && (
+                    <CheckBox
+                      checked={selectedUsers.some(u => u.id === item.id)}
+                      onPress={() => handleUserSelection(item)}
+                    />
+                  )}
+                </View>
+              </ListItem>
+            </TouchableOpacity>
           )}
         />
+        {selectedUsers.length >= 2 && (
+          <Button 
+            containerStyle={[styles.buttonContainer, { top: -5, left: 0 }]}
+            title="View Comparatives" 
+            onPress={() => setModalVisible(true)} 
+          />
+        )}
         <Modal
+          visible={modalVisible}
           animationType="slide"
           transparent={true}
-          visible={modalVisible}
-          onRequestClose={() => {
-            setModalVisible(!modalVisible);
-          }}
+          onRequestClose={() => setModalVisible(!modalVisible)}
         >
           <View style={styles.modalContainer}>
             <View style={styles.modalContent}>
               <TouchableHighlight
                 style={styles.closeButton}
-                onPress={() => {
-                  setModalVisible(!modalVisible);
-                }}
+                onPress={() => setModalVisible(!modalVisible)}
               >
                 <Text style={styles.closeButtonText}>x</Text>
               </TouchableHighlight>
               <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                <Text onPress={() => handleYearChange('prev')} style={styles.navigate} >
-                  {"<"}
-                </Text>
-                <Text style={styles.yearText}>{selectedYear}</Text>
-                <Text onPress={() => handleYearChange('next')} style={styles.navigate} >
-                  {">"}
-                </Text>
-                
+                {viewType === 'year' ? (
+                  <>
+                    <Text onPress={() => handleYearChange('prev')} style={styles.navigate}>
+                      {"<"}
+                    </Text>
+                    <Text style={styles.yearText}>{selectedYear}</Text>
+                    <Text onPress={() => handleYearChange('next')} style={styles.navigate}>
+                      {">"}
+                    </Text>
+                  </>
+                ) : (
+                  <>
+                    <Text onPress={() => handleWeekChange('prev')} style={styles.navigate}>
+                      {"<"}
+                    </Text>
+                    <Text style={styles.yearText}>
+                      {currentWeek.format('DD MMMM')}{currentWeek.year() !== moment().year() && ` ${currentWeek.year()}`} - {currentWeek.clone().endOf('isoWeek').format('DD MMMM')}{currentWeek.clone().endOf('isoWeek').year() !== moment().year() && ` ${currentWeek.clone().endOf('isoWeek').year()}`}
+                    </Text>
+                    <Text onPress={() => handleWeekChange('next')} style={styles.navigate}>
+                      {">"}
+                    </Text>
+                  </>
+                )}
               </View>
               <ScrollView style={styles.scrollContainer}>
-                {averageHours.some(item => item !== 0) ? (
-                  <View style={styles.graphic}>
-                  <YAxis
-                      data={averageHours}
-                      style={ styles.yaxis }
-                      contentInset={ styles.insetY }
-                      svg={{ fontSize: 10, fill: 'grey' }}
+                {selectedUsers.map(user => (
+                  <View key={user.id}>
+                    <Text style={styles.userName}>{user.firstName} {user.lastName}</Text>
+                    {averageHours[user.id]?.some(item => item !== 0) ? (
+                      viewType === 'year' ? (
+                        <View style={styles.graphic}>
+                          <YAxis
+                            data={averageHours[user.id]}
+                            style={styles.yaxis}
+                            contentInset={styles.insetY}
+                            svg={{ fontSize: 10, fill: 'grey' }}
+                          />
+                          <View style={styles.barchart}>
+                            <BarChart
+                              style={styles.barchartType}
+                              data={averageHours[user.id]}
+                              contentInset={styles.insetY}
+                              svg={{ stroke: '#046b0b', fill: '#145c19' }}
+                            >
+                              <Grid />
+                            </BarChart>
+                            <XAxis
+                              style={styles.xaxis}
+                              data={averageHours[user.id]}
+                              formatLabel={(value: any, index: number) => ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][index]}
+                              contentInset={styles.insetX}
+                              svg={{ fontSize: 10, fill: 'grey' }}
+                            />
+                          </View>
+                        </View>
+                      ) : (
+                        <View style={styles.graphic}>
+                          <YAxis
+                            data={averageHours[user.id]}
+                            style={styles.yaxis}
+                            contentInset={styles.insetY}
+                            svg={{ fontSize: 10, fill: 'grey' }}
+                          />
+                          <View style={styles.barchart}>
+                            <BarChart
+                              style={styles.barchartType}
+                              data={averageHours[user.id]}
+                              contentInset={styles.insetY}
+                              svg={{ stroke: '#046b0b', fill: '#145c19' }}
+                            >
+                              <Grid />
+                            </BarChart>
+                            <XAxis
+                              style={styles.xaxis}
+                              data={averageHours[user.id]}
+                              formatLabel={(value: any, index: number) => ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'][index]}
+                              contentInset={styles.insetX}
+                              svg={{ fontSize: 10, fill: 'grey' }}
+                            />
+                          </View>
+                        </View>
+                      )
+                    ) : (
+                      <Text style={styles.noRegistrationsText}> No data available for the selected {viewType}.</Text>
+                    )}
+                  </View>
+                ))}
+                <View style={styles.buttonContainer}>
+                  <Button
+                    buttonStyle={styles.button}
+                    containerStyle={[styles.buttonContainer, { top: 20, left: 25 }]}
+                    title="By Year"
+                    onPress={() => setViewType('year')}
                   />
-                  <View style={ styles.barchart }>
-                      <BarChart
-                          style={ styles.barchartType }
-                          data={averageHours}
-                          contentInset={ styles.insetY }
-                          svg={{ stroke: '#046b0b', fill: '#145c19' }}
-                      >
-                          <Grid/>
-                      </BarChart>
-                      <XAxis
-                          style={ styles.xaxis }
-                          data={averageHours}
-                          formatLabel={(value: any, index: number) => ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][index]}
-                          contentInset={ styles.insetX }
-                          svg={{ fontSize: 10, fill: 'grey' }}
-                      />
-                  </View>
-                  </View>
-
-                ) : (
-                  <Text style = {styles.noRegistrationsText}> No data available for the selected year.</Text>
-                )}
-                  <View style={styles.buttonContainer}>
-                    <Button
-                      buttonStyle={styles.button}
-                      containerStyle={[styles.buttonContainer, { top: 20, left: 25 }]}
-                      title="By Year"
-                      
-                    />
-                    <Button
-                      buttonStyle={styles.button}
-                      containerStyle={[styles.buttonContainer, { top: -20, left: 175 }]}
-                      title="By Week"
-                      
-                    />
-                  </View>
-
-    
+                  <Button
+                    buttonStyle={styles.button}
+                    containerStyle={[styles.buttonContainer, { top: -20, left: 175 }]}
+                    title="By Week"
+                    onPress={() => setViewType('week')}
+                  />
+                </View>
               </ScrollView>
             </View>
           </View>
