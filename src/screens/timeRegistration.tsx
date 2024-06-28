@@ -24,7 +24,7 @@ const TimeRegistration = () => {
   const { email, firstName, id: userId } = userStore; // Asegúrate de tener el userId en el store
   const [timeRegistration, setTimeRegistration] = useState<MarcajeDto | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
-  const [registrationState, setRegistrationState] = useState<number>(0);
+  const [registrationState, setRegistrationState] = useState<number>(2);
 
   // Function to fetch the current registration state
   const fetchRegistrationState = async () => {
@@ -122,7 +122,7 @@ const TimeRegistration = () => {
           onPress={handleRegistration}
           loading={loading}
           buttonStyle={getButtonStyle()}
-          containerStyle={[styles.buttonContainer, { top: 20, left: 105 }]}
+          containerStyle={[styles.buttonContainer, { top: 20, left: 150 }]}
           titleStyle={styles.buttonTitle}
           disabled={registrationState === 2}
         />
@@ -130,7 +130,7 @@ const TimeRegistration = () => {
           title='My Weekly Summary'
           onPress={goSummary}
           buttonStyle={styles.button}
-          containerStyle={[styles.buttonContainer, { top: 170, left: 105 }]}
+          containerStyle={[styles.buttonContainer, { top: 220, left: 150 }]}
           titleStyle={styles.buttonTitle}
         />
       </View>

@@ -59,7 +59,7 @@ const Home = () => {
           onPress={goProfile}
           loading={loading}
           buttonStyle={styles.button}
-          containerStyle={[styles.buttonContainer, { top: 150, left: 20 }]}
+          containerStyle={[styles.buttonContainer, { top: 150, left: 50 }]}
           titleStyle={styles.buttonTitle}
         />
 
@@ -68,7 +68,7 @@ const Home = () => {
           onPress={goTimeRegistration}
           loading={loading}
           buttonStyle={styles.button}
-          containerStyle={[styles.buttonContainer, { top: 150, left: 190 }]}
+          containerStyle={[styles.buttonContainer, { top: 150, right: 50 }]}
           titleStyle={styles.buttonTitle}
         />
 
@@ -79,7 +79,7 @@ const Home = () => {
               onPress={goSearchWorker} 
               loading={loading}
               buttonStyle={styles.button}
-              containerStyle={[styles.buttonContainer, { top: 300, left: 20 }]}
+              containerStyle={[styles.buttonContainer, { top: 300, left: 50 }]}
               titleStyle={styles.buttonTitle}
             />
             <Button 
@@ -87,7 +87,7 @@ const Home = () => {
               onPress={goViewGraphics} 
               loading={loading}
               buttonStyle={styles.button}
-              containerStyle={[styles.buttonContainer, { top: 300, left: 190 }]}
+              containerStyle={[styles.buttonContainer, { top: 300, right: 50 }]}
               titleStyle={styles.buttonTitle}
             />
           </>
