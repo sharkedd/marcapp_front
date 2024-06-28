@@ -2,7 +2,7 @@ import { StyleSheet } from 'react-native';
 
 const styles = StyleSheet.create({
     subtitle: {
-      fontSize: 20,
+      fontSize: 18,
       justifyContent: 'flex-start',
       fontWeight: '600',
       marginVertical: '10%',
@@ -67,9 +67,11 @@ const styles = StyleSheet.create({
       fontWeight: 'bold',
     },
     userInfo: {
-      alignItems: 'center',
-      marginVertical: -5,
-      marginHorizontal: 100,
+      alignItems: 'baseline',
+      marginVertical: -0,
+      marginHorizontal: 0,
+      height: 100,
+      width: 200,
     },
     entryText: {
       color: 'green', // Color del texto para 'entry'
@@ -195,6 +197,12 @@ const styles = StyleSheet.create({
         marginVertical: 10,
         textAlign: 'center',
       },
+      testContainer:{
+        flex: 1,
+        justifyContent: 'flex-start',
+        alignItems: 'flex-start',
+        flexDirection: 'row',
+        gap: 16,
+      }
 });
-
 export default styles;

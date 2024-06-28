@@ -186,7 +186,7 @@ const ViewGraphics: React.FC<SearchWorkerProps> = ({ navigation }) => {
           value={searchTerm}
         />
         
-        <Button title="Search" onPress={handleSearch} />
+        <Button title="Search" onPress={handleSearch} buttonStyle={styles.button}/>
         
         {loading && <ActivityIndicator size="large" color="#4287f5" />}
         
@@ -201,12 +201,13 @@ const ViewGraphics: React.FC<SearchWorkerProps> = ({ navigation }) => {
               onLongPress={() => handleLongPress(item)}
             >
               <ListItem>
+                {renderProfilePicture(item.firstName)}
                 <View style={styles.userInfo}>
-                  {renderProfilePicture(item.firstName)}
                   <ListItem.Content>
                     <ListItem.Title>{item.firstName} {item.lastName}</ListItem.Title>
                     <ListItem.Subtitle>E-mail: {item.email}</ListItem.Subtitle>
                     <ListItem.Subtitle>User ID: {item.id}</ListItem.Subtitle>
+                    <ListItem.Subtitle>Birthday: {item.birthday.split('T')[0]}</ListItem.Subtitle>
                   </ListItem.Content>
                   {multiSelect && (
                     <CheckBox
