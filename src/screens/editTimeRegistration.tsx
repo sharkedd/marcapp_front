@@ -49,18 +49,18 @@ const EditTimeRegistration = () => {
     setLoading(true);
     try {
       const response = await editTimeRegistrationService(id, data);
-      setLoading(false);
 
+      setLoading(false);
+      
       if (response.success) {
         setMessage(response.message || 'Time Registration updated successfully!');
         setAlert(true);
-        navigation.goBack();
       } else {
         throw new Error(response.message);
       }
     } catch (error) {
       setLoading(false);
-      setMessage('Error updating time registration. Please try again.');
+      setMessage('Exit time cannot be before entry time. Please try again.');
       setAlert(true);
     }
   };

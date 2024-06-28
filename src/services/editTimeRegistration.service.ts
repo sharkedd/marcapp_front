@@ -14,9 +14,14 @@ const editTimeRegistrationService = async (
     const endpoint: string = `${process.env.EXPO_PUBLIC_MS_TIMEREGISTRATION_URL}/marcaje/admin/${id}`;
     const response = await axios.patch(endpoint, data);
     console.log("EditTimeRegistration service response:", response.data);
+
+    if (response.data.success === false) {
+      return { success: false, message: response.data.message };
+    }
+      
     return {
       success: true,
-      message: 'Time registration updated successfully',
+      message: 'Time registration updated successfully!',
       data: response.data
     };
   } catch (error) {

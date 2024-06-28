@@ -80,6 +80,7 @@ const SearchWorker: React.FC<SearchWorkerProps> = ({ navigation }) => {
   };
 
   const handleAddTimeRegistration = async () => {
+    
     if (!newDate) {
       setErrorMessage('Please, complete all the fields.');
       return;
@@ -92,6 +93,8 @@ const SearchWorker: React.FC<SearchWorkerProps> = ({ navigation }) => {
 
     try {
       const response = await addTimeRegistrationService(newDate, selectedUser);
+      
+      console.log("NUEVA FECHA:", newDate)
       if (response?.success) {
         setErrorMessage('Time Registration successfully added');
         setNewDate('');
