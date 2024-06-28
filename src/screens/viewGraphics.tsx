@@ -278,6 +278,7 @@ const ViewGraphics: React.FC<SearchWorkerProps> = ({ navigation }) => {
                             style={styles.yaxis}
                             contentInset={styles.insetY}
                             svg={{ fontSize: 10, fill: 'grey' }}
+                            min={0}
                           />
                           <View style={styles.barchart}>
                             <BarChart
@@ -304,6 +305,7 @@ const ViewGraphics: React.FC<SearchWorkerProps> = ({ navigation }) => {
                             style={styles.yaxis}
                             contentInset={styles.insetY}
                             svg={{ fontSize: 10, fill: 'grey' }}
+                            min={0}
                           />
                           <View style={styles.barchart}>
                             <BarChart

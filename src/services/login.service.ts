@@ -85,10 +85,10 @@ const loginService = async (payload: { email: string; password: string }) => {
             console.error(`Error ${error.response.status}: ${error.response.data}`);
         }
       } else if (error.request) {
-        console.error('No se recibió respuesta del servidor:', error.request);
+        return {success: false, message: `No se recibió respuesta del servidor: ${error.request}`};
+        };
       } else {
-        console.error('Error al configurar la solicitud:', error.message);
-      }
+        return {success: false, message: `Error al configurar solicitud`};
     } 
     return { success: false, message: 'Error desconocido' };
   }
