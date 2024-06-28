@@ -66,8 +66,31 @@ const loginService = async (payload: { email: string; password: string }) => {
       console.log("Error del servidor")
       return { success: false, message: 'Error del servidor' };
     }
-  } catch (error: unknown) {
-    return { success: false, message: 'Credenciales incorrectas' };
+  } catch (error: any) {
+    if (axios.isAxiosError(error)) {
+      if (error.response) {
+        switch (error.response.status) {
+          case 400:
+            if (Array.isArray(error.response.data.message)) {
+              // Si es un array de mensajes, podrías combinarlos en un solo mensaje o manejarlos como necesites
+              const errorMessage = error.response.data.message.join(', ');
+              return { success: false, message: errorMessage };
+            } else {
+              // Si es un solo mensaje
+              return { success: false, message: error.response.data.message };
+            }
+          case 500:
+            return { success: false, message: 'Error del servidor (Code: 500)' };
+          default:
+            console.error(`Error ${error.response.status}: ${error.response.data}`);
+        }
+      } else if (error.request) {
+        return {success: false, message: `No se recibió respuesta del servidor: ${error.request}`};
+        };
+      } else {
+        return {success: false, message: `Error al configurar solicitud`};
+    } 
+    return { success: false, message: 'Error desconocido' };
   }
 };
 export default loginService;

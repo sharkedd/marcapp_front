@@ -18,9 +18,16 @@ type FormDataT = {
 
 const EditProfile = () => {
   const userStore = useUserStore();
+  const { firstName, lastName, role, setFirstName, setLastName } = useUserStore((state) => ({
+    firstName: state.firstName,
+    lastName: state.lastName,
+    role: state.role,
+    setFirstName: state.setFirstName,
+    setLastName: state.setLastName,
+  }));
   const InitData = {
-    firstName: userStore.firstName,
-    lastName: userStore.lastName,
+    firstName: firstName,
+    lastName: lastName,
   };
   const [data, setData] = useState<FormDataT>(InitData);
   const [alert, setAlert] = useState<boolean>(false);
@@ -43,11 +50,11 @@ const EditProfile = () => {
       setLoading(false);
 
       if (response.success) {
-        setMessage(response.message || 'Profile updated successfully');  
-        userStore.setFirstName(data.firstName);
-        userStore.setLastName(data.lastName);
+        setMessage(response.message || 'Profile updated successfully!');  
+        setFirstName(data.firstName);
+        setLastName(data.lastName);
         setAlert(true);
-        navigation.navigate('Profile');
+        navigation.navigate('EditProfile');
       }
     } catch (error) {
       setLoading(false);
@@ -84,10 +91,8 @@ const EditProfile = () => {
       </AlertDialog>
       <VStack space={4} alignItems="center">
         <Center>
-          <Text
-            style={styles.description}
-          >
-            Edit Your Profile
+          <Text style={styles.description}>
+            Edit your profile data
           </Text>
         </Center>
         <Center>
@@ -110,19 +115,14 @@ const EditProfile = () => {
             onChange={(e) => setValue('lastName', e.nativeEvent.text)}
           />
         </Center>
-        <View
-        style={styles.testContainer}
-      >
-        <Button isLoading={loading} onPress={onEdit}>
-          Save changes
-        </Button>
-      </View>
-        
+        <View style={styles.testContainer}>
+          <Button isLoading={loading} onPress={onEdit}>
+            Save changes
+          </Button>
+        </View>
       </VStack>
     </Box>
   );
 };
-
-
 
 export default EditProfile;

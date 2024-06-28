@@ -14,10 +14,20 @@ import { StyleSheet } from 'react-native';
 import styles from '../styles/profile.styles';
 
 const Profile = () => {
-  const userStore = useUserStore.getState();
+  const { firstName, lastName, email, birthday, role, setFirstName, setLastName,  } = useUserStore((state) => ({
+    firstName: state.firstName,
+    lastName: state.lastName,
+    email: state.email,
+    birthday: state.birthday,
+    role: state.role,
+    setFirstName: state.setFirstName,
+    setLastName: state.setLastName,
+    setEmail: state.setEmail,
+    setBirthday: state.setBirthday,
+    setRole: state.setRole,
+  }));
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
-  const birthday = new Date(userStore.birthday);
- 
+  
   const goEdit = () => {
     navigation.navigate("EditProfile");
   }
@@ -34,22 +44,6 @@ const Profile = () => {
     }
     return color;
   };
-  
-  /*
-  useEffect(() => {
-    const getUser = async () => {
-      try {
-        const profile = await profileService();
-        if (!profile?.success) {
-          console.log('Fallo obtención del usuario');
-        }
-      } catch (error) {
-        console.log(error);
-      }
-    };
-    getUser();
-  }, []);
-  */
 
 const renderProfilePicture = (name: string) => {
     const initial = name.charAt(0).toUpperCase();
@@ -73,11 +67,11 @@ return (
                 justifyContent: 'space-around',
             }}
         />
-        {renderProfilePicture(userStore.firstName)}
-        <Text style={styles.name}>{useUserStore.getState().firstName} {useUserStore.getState().lastName}</Text>
-        <Text style={styles.info}>Email: {userStore.email}</Text>
+        {renderProfilePicture(firstName)}
+        <Text style={styles.name}>{firstName} {lastName}</Text>
+        <Text style={styles.info}>Email: {email}</Text>
         <Text style={styles.info}>
-            Birthday: {birthday.getUTCDate().toString()} {moment.months(birthday.getUTCMonth())} {birthday.getFullYear().toString()}
+            Birthday: {birthday.split('T')[0]}
         </Text>
 
         <Button title = "Edit Profile" onPress={goEdit} loading = {loading} />
