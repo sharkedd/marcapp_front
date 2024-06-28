@@ -15,8 +15,8 @@ const editTimeRegistrationService = async (
     const response = await axios.patch(endpoint, data);
     console.log("EditTimeRegistration service response:", response.data);
 
-    if (response.data == "") {
-      return { success: false, message: 'Invalid registration' };
+    if (response.data.success === false) {
+      return { success: false, message: response.data.message };
     }
       
     return {

@@ -14,7 +14,7 @@ import { StyleSheet } from 'react-native';
 import styles from '../styles/profile.styles';
 
 const Profile = () => {
-  const { firstName, lastName, email, birthday, role, setFirstName, setLastName,  } = useUserStore((state) => ({
+  const { firstName, lastName, email, birthday, role, setFirstName, setLastName, setEmail, setBirthday, setRole } = useUserStore((state) => ({
     firstName: state.firstName,
     lastName: state.lastName,
     email: state.email,
@@ -26,6 +26,7 @@ const Profile = () => {
     setBirthday: state.setBirthday,
     setRole: state.setRole,
   }));
+  
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   
   const goEdit = () => {
@@ -45,7 +46,7 @@ const Profile = () => {
     return color;
   };
 
-const renderProfilePicture = (name: string) => {
+  const renderProfilePicture = (name: string) => {
     const initial = name.charAt(0).toUpperCase();
     const backgroundColor = generateRandomColor();
     return (
@@ -53,34 +54,33 @@ const renderProfilePicture = (name: string) => {
         <Text style={styles.initial}>{initial}</Text>
       </View>
     );
-};
+  };
 
-const [loading, setLoading] = useState<boolean>(false);
-return (
-    <Box style = {styles.container}>
-        <Header
-            centerComponent={{ text: 'Profile info', style: { color: '#fff',
-            fontWeight: 'bold', fontSize: 20
-            } }}
-            containerStyle={{
-                backgroundColor: '#0AA5F2',
-                justifyContent: 'space-around',
-            }}
-        />
-        {renderProfilePicture(firstName)}
-        <Text style={styles.name}>{firstName} {lastName}</Text>
-        <Text style={styles.info}>Email: {email}</Text>
-        <Text style={styles.info}>
-            Birthday: {birthday.split('T')[0]}
-        </Text>
+  const formatDate = (date: string) => {
+    return moment(date).format('DD MMMM YYYY');
+  }
 
-        <Button title = "Edit Profile" onPress={goEdit} loading = {loading} />
-            <View
-                style={styles.button}
-            ></View>
+  const [loading, setLoading] = useState<boolean>(false);
+
+  return (
+    <Box style={styles.container}>
+      <Header
+        centerComponent={{ text: 'Profile info', style: { color: '#fff', fontWeight: 'bold', fontSize: 20 } }}
+        containerStyle={{
+          backgroundColor: '#0AA5F2',
+          justifyContent: 'space-around',
+        }}
+      />
+      {renderProfilePicture(firstName)}
+      <Text style={styles.name}>{firstName} {lastName}</Text>
+      <Text style={styles.info}>Email: {email}</Text>
+      <Text style={styles.info}>
+        Birthday: {formatDate(birthday)}
+      </Text>
+      <Button title="Edit Profile" onPress={goEdit} loading={loading} />
+      <View style={styles.button}></View>
     </Box>
-    
-    );
+  );
 };
 
 export default Profile;
